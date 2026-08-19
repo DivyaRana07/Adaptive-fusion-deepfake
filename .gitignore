@@ -1,0 +1,32 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Pytest / Caches
+.pytest_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# Virtual Environments
+venv/
+env/
+.env
+
+# Model Checkpoints & Large Data
+checkpoints/
+checkpoints_meta/
+*.pth
+*.pt
+*.onnx
+
+# Data & Output Dirs
+data/
+outputs/
+logs/
+
+# Build & Eggs
+build/
+dist/
+*.egg-info/

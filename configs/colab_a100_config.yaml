@@ -1,0 +1,23 @@
+# ==============================================================================
+# Google Colab / High Performance A100 GPU Configuration
+# ==============================================================================
+
+device: "cuda"
+precision: "amp"  # Automatic Mixed Precision (torch.cuda.amp)
+cudnn_benchmark: true
+
+data:
+  image_size: 224
+  batch_size: 64
+  num_workers: 8
+  pin_memory: true
+
+model:
+  backbone: "efficientnet_b4"
+  feature_dim: 512
+
+training:
+  epochs: 30
+  lr: 0.0005
+  grad_accum_steps: 1
+  checkpoint_dir: "/content/drive/MyDrive/deepfake_checkpoints"

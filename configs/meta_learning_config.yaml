@@ -1,0 +1,46 @@
+# ==============================================================================
+# MLDG-style Episodic Meta-Learning Configuration
+# ==============================================================================
+
+meta_learning:
+  enabled: true
+  method: "mldg"  # Meta-Learning for Domain Generalization
+  
+  # Pseudo-domain splits from FaceForensics++
+  pseudo_domains:
+    - name: "domain_df_c23"
+      manipulation: "Deepfakes"
+      compression: "c23"
+    - name: "domain_f2f_c23"
+      manipulation: "Face2Face"
+      compression: "c23"
+    - name: "domain_fs_c23"
+      manipulation: "FaceSwap"
+      compression: "c23"
+    - name: "domain_nt_c23"
+      manipulation: "NeuralTextures"
+      compression: "c23"
+    - name: "domain_df_c40"
+      manipulation: "Deepfakes"
+      compression: "c40"
+    - name: "domain_f2f_c40"
+      manipulation: "Face2Face"
+      compression: "c40"
+    - name: "domain_fs_c40"
+      manipulation: "FaceSwap"
+      compression: "c40"
+    - name: "domain_nt_c40"
+      manipulation: "NeuralTextures"
+      compression: "c40"
+
+  # Episode Sampling
+  episodes_per_epoch: 100
+  meta_train_domains_per_ep: 3
+  meta_test_domains_per_ep: 1
+  inner_batch_size: 8
+  
+  # Hyperparameters
+  inner_lr: 0.001
+  meta_lr: 0.0003
+  meta_test_weight: 1.0   # Weight beta for held-out domain loss
+  first_order: true       # First-order MAML approximation for efficiency

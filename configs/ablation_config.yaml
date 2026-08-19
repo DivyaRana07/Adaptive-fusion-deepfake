@@ -1,0 +1,78 @@
+# ==============================================================================
+# Ablation Matrix Configuration (Section 9 & 10 of Thesis)
+# ==============================================================================
+
+ablations:
+  # 1. Single Branch Baselines
+  single_branch:
+    - name: "branch_face_only"
+      active_branches: ["face_crop"]
+      fusion_type: "none"
+      meta_learning: false
+      auxiliary: false
+    - name: "branch_frame_only"
+      active_branches: ["full_frame"]
+      fusion_type: "none"
+      meta_learning: false
+      auxiliary: false
+    - name: "branch_freq_only"
+      active_branches: ["frequency"]
+      fusion_type: "none"
+      meta_learning: false
+      auxiliary: false
+    - name: "branch_motion_only"
+      active_branches: ["motion"]
+      fusion_type: "none"
+      meta_learning: false
+      auxiliary: false
+
+  # 2. Fusion Mechanisms Comparison
+  fusion_variants:
+    - name: "fusion_concat"
+      active_branches: ["face_crop", "full_frame", "frequency", "motion"]
+      fusion_type: "concat"
+      meta_learning: false
+      auxiliary: false
+    - name: "fusion_fixed_average"
+      active_branches: ["face_crop", "full_frame", "frequency", "motion"]
+      fusion_type: "fixed_average"
+      meta_learning: false
+      auxiliary: false
+    - name: "fusion_self_attention"
+      active_branches: ["face_crop", "full_frame", "frequency", "motion"]
+      fusion_type: "self_attention"
+      meta_learning: false
+      auxiliary: false
+
+  # 3. Component Ablations (Full 4-Branch)
+  component_matrix:
+    - name: "ours_no_meta_no_aux"
+      active_branches: ["face_crop", "full_frame", "frequency", "motion"]
+      fusion_type: "domain_conditioned"
+      meta_learning: false
+      auxiliary: false
+      hyperspherical: true
+    - name: "ours_meta_only"
+      active_branches: ["face_crop", "full_frame", "frequency", "motion"]
+      fusion_type: "domain_conditioned"
+      meta_learning: true
+      auxiliary: false
+      hyperspherical: true
+    - name: "ours_aux_only"
+      active_branches: ["face_crop", "full_frame", "frequency", "motion"]
+      fusion_type: "domain_conditioned"
+      meta_learning: false
+      auxiliary: true
+      hyperspherical: true
+    - name: "ours_no_hyperspherical"
+      active_branches: ["face_crop", "full_frame", "frequency", "motion"]
+      fusion_type: "domain_conditioned"
+      meta_learning: true
+      auxiliary: true
+      hyperspherical: false
+    - name: "ours_full_proposed"
+      active_branches: ["face_crop", "full_frame", "frequency", "motion"]
+      fusion_type: "domain_conditioned"
+      meta_learning: true
+      auxiliary: true
+      hyperspherical: true

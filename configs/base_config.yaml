@@ -1,0 +1,96 @@
+# ==============================================================================
+# Adaptive Fusion for Cross-Dataset Deepfake Detection - Base Configuration
+# ==============================================================================
+
+# Project & Experiment
+project_name: "adaptive_fusion_deepfake"
+experiment_name: "4branch_domain_conditioned"
+seed: 42
+device: "auto"  # 'cuda', 'cpu', or 'auto'
+
+# Data Configuration
+data:
+  image_size: 224
+  batch_size: 16
+  num_workers: 2
+  train_val_split: 0.8
+  
+  # Supported Datasets
+  datasets:
+    ffpp:
+      root_dir: "data/FaceForensics++"
+      manipulations: ["Deepfakes", "Face2Face", "FaceSwap", "NeuralTextures"]
+      compressions: ["c23", "c40"]
+    celeb_df:
+      root_dir: "data/Celeb-DF-v2"
+    dfdc:
+      root_dir: "data/DFDC"
+    diffusion_ood:
+      root_dir: "data/Diffusion_OOD"
+    reenactment_ood:
+      root_dir: "data/Reenactment_LivePortrait_OOD"
+
+# Model Architecture Configuration
+model:
+  backbone: "efficientnet_b0"  # 'efficientnet_b0', 'resnet50', 'convnext_tiny'
+  pretrained: true
+  feature_dim: 256
+  
+  # Four Forensic Branches
+  branches:
+    face_crop:
+      enabled: true
+      in_channels: 3
+    full_frame:
+      enabled: true
+      in_channels: 3
+    frequency:
+      enabled: true
+      in_channels: 4 # DWT LL, LH, HL, HH or FFT magnitude channels
+      wavelet: "haar"
+    motion:
+      enabled: true
+      in_channels: 3 # Optical flow (u, v, magnitude) or HSV map
+      method: "farneback" # 'farneback' or 'raft'
+
+  # Auxiliary Self-Supervised Shift Heads
+  auxiliary:
+    enabled: true
+    compression_classes: 5 # [raw/q95, q85, q70, q50, q30]
+    blending_bins: 5       # [0.0-0.2, 0.2-0.4, 0.4-0.6, 0.6-0.8, 0.8-1.0]
+    motion_bins: 5         # Motion variance severity levels
+    shift_vector_dim: 3    # Uncertainty entropy/variance from the 3 heads
+
+  # Hyperspherical Manifold Regularization (GenD-style)
+  hyperspherical:
+    enabled: true
+    metric: "cosine"
+    margin: 0.35
+    scale: 30.0
+
+  # Domain-Conditioned Fusion Module
+  fusion:
+    type: "domain_conditioned" # 'domain_conditioned', 'concat', 'fixed_average', 'self_attention'
+    hidden_dim: 128
+    dropout: 0.2
+    temperature: 1.0
+
+# Loss Weights
+loss:
+  cls_weight: 1.0
+  aux_compression_weight: 0.2
+  aux_blending_weight: 0.2
+  aux_motion_weight: 0.2
+  hyperspherical_weight: 0.1
+
+# Optimizer & Scheduler
+training:
+  epochs: 20
+  lr: 0.0003
+  weight_decay: 0.0001
+  scheduler: "cosine_warmup"
+  warmup_epochs: 2
+  min_lr: 0.000001
+  grad_clip: 1.0
+  checkpoint_dir: "checkpoints"
+  save_every: 2

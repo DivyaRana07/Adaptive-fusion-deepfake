@@ -1,0 +1,92 @@
+# ==============================================================================
+# Kaggle Dual Tesla T4 (2x 16GB) High-Throughput Training Configuration
+# ==============================================================================
+
+project_name: "adaptive_fusion_deepfake"
+experiment_name: "kaggle_dual_t4_benchmark"
+seed: 42
+
+# Hardware Acceleration
+device: "cuda"
+precision: "fp16"           # Automatic Mixed Precision (AMP) for T4 Tensor Cores
+multi_gpu: true             # Multi-GPU DataParallel / DDP across 2x T4
+cudnn_benchmark: true
+
+# Kaggle Dataset Locations & Paths
+kaggle_paths:
+  base_input_dir: "/kaggle/input"
+  working_dir: "/kaggle/working"
+  checkpoint_dir: "/kaggle/working/checkpoints"
+  output_dir: "/kaggle/working/outputs"
+  reenactment_dir: "/kaggle/working/data/Reenactment_LivePortrait_OOD"
+
+# Batching & DataLoader
+data:
+  image_size: 224
+  batch_size: 64            # 32 per T4 GPU
+  num_workers: 4            # Maximize Kaggle CPU core utilization
+  pin_memory: true
+  train_val_split: 0.85
+  max_samples_per_domain: 200 # Set higher (e.g. 500-1000) for full dataset training
+
+# Model Architecture
+model:
+  backbone: "efficientnet_b0" # Lightweight & fast on T4 ('efficientnet_b0' or 'resnet50')
+  pretrained: true
+  feature_dim: 256
+  
+  branches:
+    face_crop:
+      enabled: true
+    full_frame:
+      enabled: true
+    frequency:
+      enabled: true
+      wavelet: "haar"
+    motion:
+      enabled: true
+      method: "farneback"
+
+  auxiliary:
+    enabled: true
+    compression_classes: 5
+    blending_bins: 5
+    motion_bins: 5
+    shift_vector_dim: 3
+
+  hyperspherical:
+    enabled: true
+    margin: 0.35
+    scale: 30.0
+
+  fusion:
+    type: "domain_conditioned"
+    hidden_dim: 128
+    dropout: 0.2
+    temperature: 1.0
+
+# Loss Weights
+loss:
+  cls_weight: 1.0
+  aux_compression_weight: 0.2
+  aux_blending_weight: 0.2
+  aux_motion_weight: 0.2
+  hyperspherical_weight: 0.1
+
+# Optimization & Episodic Meta-Learning
+training:
+  epochs: 10
+  lr: 0.0005
+  weight_decay: 0.0001
+  warmup_epochs: 2
+  grad_clip: 1.0
+  save_every: 2
+
+meta_learning:
+  enabled: true
+  episodes_per_epoch: 30
+  meta_train_domains_per_ep: 3
+  meta_test_domains_per_ep: 1
+  inner_batch_size: 16
+  inner_lr: 0.001
+  meta_test_weight: 1.0
